@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once '../config.php'; // Include configuration file
-require_once '../includes/auth_check.php'; // Include authentication check
+// require_once '../includes/auth_check.php'; // Include authentication check
 require_once INCLUDES_PATH . 'db_connections.php'; // Include DB connection
 
 $error = "";
