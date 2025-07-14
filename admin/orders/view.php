@@ -84,19 +84,7 @@ $items = $connection->query("
 
     <div>
       <h3 class="text-xl font-semibold mb-2">🔧 Update Order Status</h3>
-      <form method="POST" action="update_status.php" class="flex items-center gap-4 mt-2">
-        <input type="hidden" name="order_id" value="<?= $orderId ?>">
-        <select name="status" class="border rounded px-4 py-2 w-60 focus:ring focus:ring-blue-200">
-          <?php foreach (['pending','shipped','delivered','cancelled'] as $opt): ?>
-            <option value="<?= $opt ?>" <?= $order['order_status'] === $opt ? 'selected' : '' ?>>
-              <?= ucfirst($opt) ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
-        <button type="submit" class="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-          Update Status
-        </button>
-      </form>
+          <a href="update_status.php?order_id=<?= $orderId ?>" class="px-5 py-2 bg-green-600 text-white rounded hover:bg-green-700">update status</a>
     </div>
   </div>
 
