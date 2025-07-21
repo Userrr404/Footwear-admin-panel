@@ -28,20 +28,37 @@ $totalPages = ceil($totalCount / $limit);
 $orders = $connection->query("SELECT orders.*, users.username FROM orders JOIN users ON orders.user_id = users.user_id $where ORDER BY orders.placed_at DESC LIMIT $limit OFFSET $offset");
 ?>
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Admin Orders | Footwear Admin Panel</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orders List</title>
+  <style>
+    #main{
+      margin-top:30px;
+    }
+  </style>
+  <!-- Tailwind CSS 
+    Without this js sidebar and main content of this page not toggle and also menuToggle.js important -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    }
+  </script>
 </head>
-<body class="bg-gray-100 p-6 font-sans">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white transition-colors duration-300">
+  <?php include('../includes/header.php'); ?>
+  <?php include('../includes/sidebar.php'); ?>
 
-<div class="max-w-7xl mx-auto">
-  <h1 class="text-3xl font-bold mb-6 text-gray-800">🧾 All Orders</h1>
+  <!-- Main Content -->
+  <div id="main" class="ml-60 transition-all duration-300 p-6">
+    <main>
+      <h1 class="text-3xl font-bold mb-6 text-gray-800">🧾 All Orders</h1>
 
-  <!-- Search & Filter Bar -->
+      <!-- Search & Filter Bar -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
     <form class="flex gap-2" method="GET">
       <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" class="px-3 py-2 border rounded w-64" placeholder="Search user or status...">
@@ -124,7 +141,10 @@ $orders = $connection->query("SELECT orders.*, users.username FROM orders JOIN u
       <?php endfor; ?>
     </div>
   <?php endif; ?>
-</div>
+    </main>
 
+  </div>
+  <!-- Scrips -->
+   <script src="../assets/js/menuToggle.js"></script>
 </body>
 </html>

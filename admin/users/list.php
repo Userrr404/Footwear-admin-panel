@@ -40,13 +40,6 @@ $totalPages = ceil($totalUsers / $limit);
 
 <h2 class="mb-4">User Management</h2>
 
-<!-- <form method="GET" class="mb-3">
-  <div class="input-group">
-    <input type="text" name="search" class="form-control" placeholder="Search by name or email" value="<?= htmlspecialchars($search) ?>">
-    <button class="btn btn-primary">Search</button>
-  </div>
-</form> -->
-
 <div class="d-flex justify-content-between mb-3">
   <form method="GET" class="d-flex" style="gap: 10px;">
     <input type="text" name="search" class="form-control" placeholder="Search by name or email" value="<?= htmlspecialchars($search) ?>">

@@ -44,10 +44,22 @@ $result = $connection->query("
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Admin | Product List</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product List</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Tailwind CSS 
+    Without this js sidebar and main content of this page not toggle and also menuToggle.js important -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    }
+  </script>
   <style>
+    #main{
+      margin-top: 60px;
+    }
     .product-img { width: 60px; height: 60px; object-fit: cover; border-radius: .4rem; }
     .truncate { max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     td input, td textarea { width: 100%; resize: vertical; }
@@ -61,11 +73,19 @@ $result = $connection->query("
     }
   </style>
 </head>
-<body class="bg-light">
-<div class="container py-4">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white transition-colors duration-300">
+
+<?php include('../includes/header.php'); ?>
+  <?php include('../includes/sidebar.php'); ?>
+
+  <!-- Main Content -->
+  <div id="main" class="ml-60 transition-all duration-300 p-6">
   <div class="alert alert-success alert-fixed" id="successAlert">✅ Saved</div>
 
-  <div class="d-flex justify-content-between align-items-center mb-3">
+    <!-- <h1 class="text-2xl font-semibold mb-6">Welcome to the Admin Dashboard</h1> -->
+
+    <main>
+      <div class="d-flex justify-content-between align-items-center mb-3">
     <h3 class="fw-bold">🛍️ Manage Products</h3>
     <a href="add.php" class="btn btn-success"><i class="bi bi-plus-circle me-1"></i> Add Product</a>
   </div>
@@ -155,7 +175,11 @@ $result = $connection->query("
   </nav>
 </div>
 
-<!-- JS -->
+    </main>
+  </div>
+
+  <script src="../assets/js/menuToggle.js"></script>
+  <!-- JS -->
 <script>
   const showAlert = (message = '✅ Saved') => {
     const alert = document.getElementById("successAlert");

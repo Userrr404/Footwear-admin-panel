@@ -72,7 +72,7 @@ $items = $itemsStmt->get_result();
         🖨️ Print Invoice
       </a>
       <a href="export_order_csv.php?id=<?= $order['order_id'] ?>" class="btn btn-outline-primary me-2">📄 Export CSV</a>
-        <a href="update_status.php?order_id=<?= $order['order_id'] ?>" class="btn btn-success">🛠️ Update Status</a>
+        <a href="update_status_page.php?order_id=<?= $order['order_id'] ?>" class="btn btn-success">🛠️ Update Status</a>
     </div>
   </div>
 

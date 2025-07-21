@@ -163,7 +163,14 @@ for ($i = 0; $i < 12; $i++) {
   <meta charset="UTF-8">
   <title>Admin Dashboard - Footwear</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    #main{
+      margin-top:30px;
+    }
+  </style>
   <script src="../assets/js/menuToggle.js"></script>
+  <!-- Tailwind CSS 
+    Without this js sidebar and main content of this page not toggle and also menuToggle.js important -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -179,7 +186,6 @@ for ($i = 0; $i < 12; $i++) {
 
 <!-- Main Content -->
   <div id="main" class="ml-60 transition-all duration-300 p-6">
-    <h1 class="text-2xl font-semibold mb-6">Welcome to the Admin Dashboard</h1>
 
     <main>
       <?php if ($newOrders > 0): ?>

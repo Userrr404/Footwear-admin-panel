@@ -32,61 +32,97 @@ $items = $connection->query("
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 p-8 font-sans text-gray-800">
+<body class="bg-gray-50 font-sans text-gray-800">
 
-  <div class="max-w-5xl mx-auto">
-    <div class="mb-8">
-      <h2 class="text-3xl font-bold text-gray-800 mb-2">🧾 Order #<?= $orderId ?> Details</h2>
-      <div class="space-y-1 text-sm text-gray-700">
-        <p><strong>Status:</strong>
-          <?php
-            $status = strtolower($order['order_status'] ?? 'unknown');
-            $badge = match ($status) {
-              'pending' => 'bg-yellow-100 text-yellow-700',
-              'shipped' => 'bg-blue-100 text-blue-700',
-              'delivered' => 'bg-green-100 text-green-700',
-              'cancelled' => 'bg-red-100 text-red-700',
-              default => 'bg-gray-200 text-gray-600',
-            };
-          ?>
-          <span class="inline-block px-2 py-1 rounded text-xs font-semibold <?= $badge ?>">
-            <?= ucfirst($status) ?>
-          </span>
-        </p>
-        <p><strong>Total:</strong> ₹<?= number_format($order['total_amount'] ?? 0, 2) ?></p>
-        <p><strong>Date:</strong> <?= date('d M Y, h:i A', strtotime($order['placed_at'] ?? 'now')) ?></p>
-      </div>
+<div class="max-w-6xl mx-auto px-4 py-8">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <a href="list.php" class="inline-flex items-center text-sm text-blue-600 hover:underline">
+      ← Back to Orders List
+    </a>
+    <h1 class="text-2xl font-bold text-gray-800">🧾 Order #<?= $orderId ?> Details</h1>
+  </div>
+
+  <!-- Order Summary -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+    <?php
+      $status = strtolower($order['order_status'] ?? 'unknown');
+      $badge = match ($status) {
+        'pending' => 'bg-yellow-100 text-yellow-800',
+        'shipped' => 'bg-blue-100 text-blue-800',
+        'delivered' => 'bg-green-100 text-green-800',
+        'cancelled' => 'bg-red-100 text-red-800',
+        default => 'bg-gray-100 text-gray-600',
+      };
+    ?>
+    <div class="bg-white shadow rounded-lg p-6 border border-gray-200">
+      <p class="text-sm text-gray-500">Status</p>
+      <span class="inline-block mt-1 px-3 py-1 rounded text-sm font-semibold <?= $badge ?>">
+        <?= ucfirst($status) ?>
+      </span>
     </div>
-
-    <div class="mb-10">
-      <h3 class="text-2xl font-semibold mb-4">📦 Ordered Items</h3>
-      <div class="overflow-x-auto bg-white shadow-md rounded-lg">
-        <table class="min-w-full text-sm">
-          <thead class="bg-gray-100 text-left">
-            <tr>
-              <th class="px-6 py-3 font-medium">Product</th>
-              <th class="px-6 py-3 font-medium">Quantity</th>
-              <th class="px-6 py-3 font-medium">Price</th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php while ($item = $items->fetch_assoc()): ?>
-              <tr class="border-t">
-                <td class="px-6 py-3"><?= htmlspecialchars($item['product_name']) ?></td>
-                <td class="px-6 py-3"><?= intval($item['quantity']) ?></td>
-                <td class="px-6 py-3">₹<?= number_format($item['price'], 2) ?></td>
-              </tr>
-            <?php endwhile; ?>
-          </tbody>
-        </table>
-      </div>
+    <div class="bg-white shadow rounded-lg p-6 border border-gray-200">
+      <p class="text-sm text-gray-500">Total Amount</p>
+      <p class="mt-1 text-lg font-semibold text-gray-800">₹<?= number_format($order['total_amount'] ?? 0, 2) ?></p>
     </div>
-
-    <div>
-      <h3 class="text-xl font-semibold mb-2">🔧 Update Order Status</h3>
-          <a href="update_status.php?order_id=<?= $orderId ?>" class="px-5 py-2 bg-green-600 text-white rounded hover:bg-green-700">update status</a>
+    <div class="bg-white shadow rounded-lg p-6 border border-gray-200">
+      <p class="text-sm text-gray-500">Order Date</p>
+      <p class="mt-1 text-base text-gray-800"><?= date('d M Y, h:i A', strtotime($order['placed_at'] ?? 'now')) ?></p>
     </div>
   </div>
 
+  <!-- Ordered Items -->
+  <div class="mb-10">
+    <h2 class="text-xl font-semibold mb-4 text-gray-800">📦 Ordered Items</h2>
+    <div class="overflow-x-auto bg-white border border-gray-200 shadow rounded-lg">
+      <table class="min-w-full text-sm text-gray-700">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="text-left px-6 py-3 font-semibold">Product</th>
+            <th class="text-left px-6 py-3 font-semibold">Quantity</th>
+            <th class="text-left px-6 py-3 font-semibold">Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php while ($item = $items->fetch_assoc()): ?>
+            <tr class="border-t hover:bg-gray-50">
+              <td class="px-6 py-4"><?= htmlspecialchars($item['product_name']) ?></td>
+              <td class="px-6 py-4"><?= intval($item['quantity']) ?></td>
+              <td class="px-6 py-4">₹<?= number_format($item['price'], 2) ?></td>
+            </tr>
+          <?php endwhile; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+      <!-- Update Status and Invoice Section -->
+    <div class="bg-white border border-gray-200 p-6 rounded-lg shadow flex flex-col md:flex-row items-center justify-between gap-4">
+      <form action="update_status.php" method="POST" class="flex items-center gap-4 flex-wrap">
+        <input type="hidden" name="order_id" value="<?= $orderId ?>">
+
+        <label for="order_status" class="text-sm font-medium text-gray-700">Change Order Status:</label>
+        <select name="order_status" id="order_status" class="px-3 py-2 border rounded-md bg-white text-sm shadow-sm focus:ring-2 focus:ring-blue-500">
+          <?php
+            $statuses = ['Pending', 'Shipped', 'Delivered', 'Cancelled'];
+            foreach ($statuses as $s):
+              $selected = strtolower($order['order_status']) === strtolower($s) ? 'selected' : '';
+          ?>
+            <option value="<?= $s ?>" <?= $selected ?>><?= $s ?></option>
+          <?php endforeach; ?>
+        </select>
+
+        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded text-sm font-semibold transition">
+          💾 Save Status
+        </button>
+      </form>
+
+      <a href="generate_invoice.php?order_id=<?= $orderId ?>"
+         class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded text-sm font-semibold transition">
+        🧾 Download Invoice
+      </a>
+    </div>
+
+</div>
 </body>
 </html>
