@@ -1,6 +1,8 @@
 <?php
 require_once '../includes/auth_check.php';
 require_once '../includes/db_connections.php';
+// include("../includes/header.php");
+// include("../includes/sidebar.php");
 
 // KPIs
 $totalProducts = $connection->query("SELECT COUNT(*) FROM products")->fetch_row()[0] ?? 0;
@@ -104,11 +106,55 @@ GROUP BY p.product_id
 ORDER BY total_orders DESC
 LIMIT 5;
 ")->fetch_all(MYSQLI_ASSOC);
+
+// Monthly Revenue Target
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['target_year'], $_POST['target_month'], $_POST['target_amount'])) {
+    $year = intval($_POST['target_year']);
+    $month = intval($_POST['target_month']);
+    $amount = floatval($_POST['target_amount']);
+
+    // Check if target already exists
+    $stmt = $connection->prepare("SELECT id FROM monthly_targets WHERE year=? AND month=?");
+    $stmt->bind_param("ii", $year, $month);
+    $stmt->execute();
+    $stmt->store_result();
+
+    if ($stmt->num_rows > 0) {
+        // Update existing target
+        $update = $connection->prepare("UPDATE monthly_targets SET target_amount=? WHERE year=? AND month=?");
+        $update->bind_param("dii", $amount, $year, $month);
+        $update->execute();
+    } else {
+        // Insert new target
+        $insert = $connection->prepare("INSERT INTO monthly_targets (year, month, target_amount) VALUES (?, ?, ?)");
+        $insert->bind_param("iid", $year, $month, $amount);
+        $insert->execute();
+    }
+
+    echo "<script>window.location.href = '?year=$year';</script>";
+}
+
+
   
 // Monthly Revenue Target
 // Assuming a target of ₹10000 per month
-$monthlyTarget = 10000; 
-$targetAchieved = array_map(fn($rev) => min(100, round(($rev / $monthlyTarget) * 100)), $revenueCounts);
+$monthlyTargets = [];
+for ($m = 1; $m <= 12; $m++) {
+    $stmt = $connection->prepare("SELECT target_amount FROM monthly_targets WHERE year=? AND month=?");
+    $stmt->bind_param("ii", $currentYear, $m);
+    $stmt->execute();
+    $stmt->bind_result($target);
+    $stmt->fetch();
+    $monthlyTargets[$m] = $target ?: 10000; // fallback to ₹10000
+    $stmt->close();
+}
+
+$targetAchieved = [];
+for ($i = 0; $i < 12; $i++) {
+    $target = $monthlyTargets[$i + 1];
+    $revenue = $revenueCounts[$i];
+    $targetAchieved[] = min(100, round(($revenue / $target) * 100));
+}
 
 ?>
 <!DOCTYPE html>
@@ -117,6 +163,7 @@ $targetAchieved = array_map(fn($rev) => min(100, round(($rev / $monthlyTarget) *
   <meta charset="UTF-8">
   <title>Admin Dashboard - Footwear</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="../assets/js/menuToggle.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -125,90 +172,72 @@ $targetAchieved = array_map(fn($rev) => min(100, round(($rev / $monthlyTarget) *
   </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 font-sans text-gray-800 dark:text-white">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white transition-colors duration-300">
 
-<!-- Header -->
-<header class="bg-white dark:bg-gray-800 shadow fixed w-full z-10">
-  <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-    <h1 class="text-xl font-bold text-blue-600 dark:text-blue-400">👟 Footwear Admin Dashboard</h1>
-    <div class="flex items-center gap-4">
-      <div class="text-sm text-gray-600 dark:text-gray-300">
-        Welcome, <span class="font-semibold text-gray-800 dark:text-white"><?= $_SESSION['admin_name'] ?></span>
-      </div>
-      <button onclick="toggleDarkMode()" class="hover:text-blue-600 text-xl" title="Toggle Dark Mode">🌓</button>
-    </div>
-  </div>
-</header>
+<?php include('../includes/header.php'); ?>
+<?php include('../includes/sidebar.php'); ?>
 
-<!-- Sidebar + Main -->
-<div class="flex pt-20">
-  <!-- Sidebar -->
-  <aside class="w-64 bg-white dark:bg-gray-800 h-screen shadow-lg fixed">
-    <nav class="p-6 space-y-2 text-sm">
-      <a href="#" class="block py-2 px-4 rounded bg-blue-100 text-blue-600 font-semibold">📊 Dashboard</a>
-      <a href="../products/list.php" class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700">🧦 Products</a>
-      <a href="../orders/list.php" class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700">📦 Orders</a>
-      <a href="../users/list.php" class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700">👤 Users</a>
-      <a href="../coupons/list.php" class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700">🎟️ Coupons</a>
-      <a href="../reports/sales.php" class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700">📈 Reports</a>
-      <a href="../settings/index.php" class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700">⚙️ Settings</a>
-      <a href="../auth/logout.php" class="block py-2 px-4 hover:bg-red-100 text-red-600">🚪 Logout</a>
-    </nav>
-  </aside>
+<!-- Main Content -->
+  <div id="main" class="ml-60 transition-all duration-300 p-6">
+    <h1 class="text-2xl font-semibold mb-6">Welcome to the Admin Dashboard</h1>
 
-  <!-- Main Content -->
-  <main class="ml-64 w-full p-8">
-    <?php if ($newOrders > 0): ?>
+    <main>
+      <?php if ($newOrders > 0): ?>
       <div class="mb-6 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 rounded">
         <p class="font-bold">🛒 New Orders</p>
         <p><?= $newOrders ?> pending order(s). <a href="../orders/list.php" class="underline">View Orders</a></p>
       </div>
     <?php endif; ?>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Total Products -->
+        <div class="bg-white p-6 rounded-xl shadow">
+          <p class="text-sm text-gray-500">🛍️ Total Products</p>
+          <h2 class="text-3xl font-extrabold text-blue-600"><?= $totalProducts ?? 6 ?></h2>
+        </div>
 
-    <!-- KPI Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-      <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
-        <p class="text-sm text-gray-500 dark:text-gray-300">🛍️ Total Products</p>
-        <h2 class="text-3xl font-extrabold text-blue-600 dark:text-blue-400"><?= $totalProducts ?></h2>
-      </div>
-      <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
-        <p class="text-sm text-gray-500 dark:text-gray-300">📦 Total Orders</p>
-        <h2 class="text-3xl font-extrabold text-green-600"><?= $totalOrders ?></h2>
-      </div>
-      <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
-        <p class="text-sm text-gray-500 dark:text-gray-300">👤 Registered Users</p>
-        <h2 class="text-3xl font-extrabold text-yellow-500"><?= $totalUsers ?></h2>
-      </div>
-      <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
-        <p class="text-sm text-gray-500 dark:text-gray-300">💸 Total Revenue</p>
-        <h2 class="text-3xl font-extrabold text-purple-600">₹<?= number_format($totalRevenue, 2) ?></h2>
-      </div>
-    </div>
+        <!-- Total Orders -->
+        <div class="bg-white p-6 rounded-xl shadow">
+          <p class="text-sm text-gray-500">📦 Total Orders</p>
+          <h2 class="text-3xl font-extrabold text-green-600"><?= $totalOrders ?? 5 ?></h2>
+        </div>
 
-    <!-- Quick Actions -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-  <a href="../products/add.php" class="bg-blue-50 dark:bg-gray-800 p-4 rounded-lg shadow hover:bg-blue-100 flex items-center gap-4">
+        <!-- Registered Users -->
+        <div class="bg-white p-6 rounded-xl shadow">
+          <p class="text-sm text-gray-500">👤 Registered Users</p>
+          <h2 class="text-3xl font-extrabold text-yellow-500"><?= $totalUsers ?? 10 ?></h2>
+        </div>
+
+        <!-- Total Revenue -->
+        <div class="bg-white p-6 rounded-xl shadow">
+          <p class="text-sm text-gray-500">💸 Total Revenue</p>
+          <h2 class="text-3xl font-extrabold text-purple-600">₹<?= number_format($totalRevenue ?? 7494.00, 2) ?></h2>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10 mb-10">
+  <a href="../products/add.php" class="no-underline bg-blue-50 dark:bg-gray-800 p-4 rounded-lg shadow hover:bg-blue-100 flex items-center gap-4">
     <span class="text-2xl">➕</span>
     <div>
       <p class="text-sm text-gray-600 dark:text-gray-300">Add New Product</p>
       <p class="font-bold text-blue-600 dark:text-blue-400">Product</p>
     </div>
   </a>
-  <a href="../orders/refunds.php" class="bg-red-50 dark:bg-gray-800 p-4 rounded-lg shadow hover:bg-red-100 flex items-center gap-4">
+  <a href="../orders/refunds.php" class="no-underline bg-red-50 dark:bg-gray-800 p-4 rounded-lg shadow hover:bg-red-100 flex items-center gap-4">
     <span class="text-2xl">💰</span>
     <div>
       <p class="text-sm text-gray-600 dark:text-gray-300">Pending Refunds</p>
       <p class="font-bold text-red-600 dark:text-red-400">Refunds</p>
     </div>
   </a>
-  <a href="../support/index.php" class="bg-yellow-50 dark:bg-gray-800 p-4 rounded-lg shadow hover:bg-yellow-100 flex items-center gap-4">
+  <a href="../support/index.php" class="no-underline bg-yellow-50 dark:bg-gray-800 p-4 rounded-lg shadow hover:bg-yellow-100 flex items-center gap-4">
     <span class="text-2xl">🛠️</span>
     <div>
       <p class="text-sm text-gray-600 dark:text-gray-300">Support Queries</p>
       <p class="font-bold text-yellow-600 dark:text-yellow-400">Support</p>
     </div>
   </a>
-  <a href="../reports/stock.php" class="bg-purple-50 dark:bg-gray-800 p-4 rounded-lg shadow hover:bg-purple-100 flex items-center gap-4">
+  <a href="../reports/stock.php" class="no-underline bg-purple-50 dark:bg-gray-800 p-4 rounded-lg shadow hover:bg-purple-100 flex items-center gap-4">
     <span class="text-2xl">📉</span>
     <div>
       <p class="text-sm text-gray-600 dark:text-gray-300">Low Stock Alerts</p>
@@ -216,6 +245,26 @@ $targetAchieved = array_map(fn($rev) => min(100, round(($rev / $monthlyTarget) *
     </div>
   </a>
 </div>
+
+
+<section class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow mb-10">
+  <h2 class="text-lg font-semibold text-gray-700 dark:text-white mb-4">📝 Set Monthly Revenue Target</h2>
+  <form method="POST" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <select name="target_year" class="border px-3 py-2 rounded dark:bg-gray-700 dark:text-white">
+      <?php for ($y = date('Y') - 2; $y <= date('Y') + 2; $y++): ?>
+        <option value="<?= $y ?>" <?= $y == $currentYear ? 'selected' : '' ?>><?= $y ?></option>
+      <?php endfor; ?>
+    </select>
+    <select name="target_month" class="border px-3 py-2 rounded dark:bg-gray-700 dark:text-white">
+      <?php foreach ($months as $index => $name): ?>
+        <option value="<?= $index + 1 ?>"><?= $name ?></option>
+      <?php endforeach; ?>
+    </select>
+    <input type="number" name="target_amount" class="border px-3 py-2 rounded dark:bg-gray-700 dark:text-white" placeholder="Target Amount (₹)" required>
+    <button type="submit" class="col-span-1 sm:col-span-3 mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 shadow">Save Target</button>
+  </form>
+</section>
+
 
 
     <!-- Revenue Target Achievement Bar -->
@@ -312,10 +361,9 @@ $targetAchieved = array_map(fn($rev) => min(100, round(($rev / $monthlyTarget) *
     </table>
   </div>
 </section>
+    </main>
+  </div>
 
-
-  </main>
-</div>
 
 <!-- Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
