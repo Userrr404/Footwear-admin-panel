@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       <div class="mb-3">
         <label class="form-label">Phone</label>
-        <input type="text" name="user_phone" class="form-control" value="<?= htmlspecialchars($user['user_phone']) ?>">
+        <input type="text" name="user_phone" class="form-control" value="<?= !empty($user['user_phone']) ? htmlspecialchars($user['user_phone']) : 'Not Available' ?>">
       </div>
 
       <div class="row">
