@@ -68,7 +68,7 @@ $currentPage = $_SERVER['PHP_SELF']; // get current file path like /admin/produc
                🎟️ Coupons
             </a>
         
-            <a href="../reports/sales.php"
+            <a href="../reports/report_list.php"
                class="block py-2 px-4 rounded 
                <?= str_contains($currentPage, 'reports') ? 'bg-blue-100 text-blue-600 font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-700' ?>">
                📈 Reports
