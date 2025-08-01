@@ -51,8 +51,14 @@ if (!$user) {
     <div class="card-body row g-4">
       <div class="col-md-6">
         <p><strong>User ID:</strong> <?= $user['user_id'] ?></p>
+        <p><strong>Name:</strong> <?= htmlspecialchars($user['full_name']) ?></p>
         <p><strong>Email:</strong> <?= htmlspecialchars($user['user_email']) ?></p>
         <p><strong>Phone:</strong> <?= $user['user_phone'] ?? '<span class="text-muted">Not Provided</span>' ?></p>
+        <p><strong>Address:</strong> <?= $user['address'] ?? '<span class="text-muted">Not Provided</span>' ?></p>
+        <p><strong>City:</strong> <?= $user['city'] ?? '<span class="text-muted">Not Provided</span>' ?></p>
+        <p><strong>State:</strong> <?= $user['state'] ?? '<span class="text-muted">Not Provided</span>' ?></p>
+        <p><strong>Country:</strong> <?= $user['country'] ?? '<span class="text-muted">Not Provided</span>' ?></p>
+        <p><strong>Zip Code:</strong> <?= $user['zip_code'] ?? '<span class="text-muted">Not Provided</span>' ?></p>
         <p><strong>Role:</strong> <span class="badge bg-info text-dark"><?= ucfirst($user['role']) ?></span></p>
         <p><strong>Status:</strong> 
           <?php

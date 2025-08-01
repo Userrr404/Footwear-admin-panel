@@ -117,7 +117,7 @@ $paymentSummary = $connection->query("SELECT payment_method, SUM(total_amount) a
 </table>
 </div>
 <nav>
-<ul class="pagination">
+<ul class="pagination display-flex justify-content-center">
 <?php for ($i = 1; $i <= $totalPages; $i++): ?>
   <li class="page-item <?= $i == $page ? 'active' : '' ?>">
     <a class="page-link" href="?start_date=<?= $startDate ?>&end_date=<?= $endDate ?>&search=<?= urlencode($search) ?>&page=<?= $i ?>"><?= $i ?></a>

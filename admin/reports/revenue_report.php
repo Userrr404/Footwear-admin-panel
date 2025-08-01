@@ -148,7 +148,10 @@ $topCustomers = $connection->query("
     <div class="flex justify-between items-center">
       <div>
         <p class="text-sm text-gray-500">Gross Profit</p>
-        <h2 class="text-2xl font-bold text-green-700">₹<?= number_format($profitData['profit'], 2) ?></h2>
+  <!-- Deprecated: number_format(): Passing null to parameter #1 ($num) of type float is deprecated
+      Resolve this issue 
+      that's why issue (float) datatype -->
+        <h2 class="text-2xl font-bold text-green-700">₹<?= number_format((float) $profitData['profit'], 2) ?></h2>
       </div>
       <div class="text-green-700 text-xl">
         📈
@@ -161,7 +164,10 @@ $topCustomers = $connection->query("
     <div class="flex justify-between items-center">
       <div>
         <p class="text-sm text-gray-500">COGS</p>
-        <h2 class="text-2xl font-bold text-red-500">₹<?= number_format($profitData['cogs'], 2) ?></h2>
+          <!-- Deprecated: number_format(): Passing null to parameter #1 ($num) of type float is deprecated
+              Resolve this issue 
+              that's why issue (float) datatype -->
+        <h2 class="text-2xl font-bold text-red-500">₹<?= number_format((float) $profitData['cogs'], 2) ?></h2>
       </div>
       <div class="text-red-500 text-xl">
         🏷️
