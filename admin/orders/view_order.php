@@ -8,8 +8,8 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 
 $order_id = intval($_GET['id']);
 
-// Fetch order details
-$orderStmt = $connection->prepare("SELECT o.*, u.username, u.user_email 
+// Fetch order + user details
+$orderStmt = $connection->prepare("SELECT o.*, u.username, u.full_name, u.user_email, u.user_phone 
                                    FROM orders o 
                                    JOIN users u ON o.user_id = u.user_id 
                                    WHERE o.order_id = ?");
@@ -37,6 +37,13 @@ $itemsStmt = $connection->prepare("
 $itemsStmt->bind_param("i", $order_id);
 $itemsStmt->execute();
 $items = $itemsStmt->get_result();
+
+// Fetch shipping address
+$addressStmt = $connection->prepare("SELECT * FROM addresses WHERE address_id = ?");
+$addressStmt->bind_param("i", $order['address_id']);
+$addressStmt->execute();
+$addressResult = $addressStmt->get_result();
+$address = $addressResult->fetch_assoc();
 ?>
 
 <!DOCTYPE html>
@@ -46,20 +53,10 @@ $items = $itemsStmt->get_result();
   <title>View Order #<?= $order['order_id'] ?> | Admin Panel</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    body {
-      background-color: #f8f9fa;
-    }
-    .table td, .table th {
-      vertical-align: middle;
-    }
-    .order-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .order-header h3 {
-      margin: 0;
-    }
+    body { background-color: #f8f9fa; }
+    .table td, .table th { vertical-align: middle; }
+    .order-header { display: flex; justify-content: space-between; align-items: center; }
+    .order-header h3 { margin: 0; }
   </style>
 </head>
 <body class="container mt-4">
@@ -68,11 +65,9 @@ $items = $itemsStmt->get_result();
     <h3>🧾 Order #<?= $order['order_id'] ?> Details</h3>
     <div>
       <a href="../users/view_user.php?id=<?= $order['user_id'] ?>" class="btn btn-secondary me-2">← Back to User</a>
-      <a href="print_invoice.php?id=<?= $order['order_id'] ?>" target="_blank" class="btn btn-outline-dark">
-        🖨️ Print Invoice
-      </a>
+      <a href="print_invoice.php?id=<?= $order['order_id'] ?>" target="_blank" class="btn btn-outline-dark">🖨️ Print Invoice</a>
       <a href="export_order_csv.php?id=<?= $order['order_id'] ?>" class="btn btn-outline-primary me-2">📄 Export CSV</a>
-        <a href="update_status_page.php?order_id=<?= $order['order_id'] ?>" class="btn btn-success">🛠️ Update Status</a>
+      <a href="update_status_page.php?order_id=<?= $order['order_id'] ?>" class="btn btn-success">🛠️ Update Status</a>
     </div>
   </div>
 
@@ -81,8 +76,12 @@ $items = $itemsStmt->get_result();
     <div class="card-header bg-dark text-white">Order Summary</div>
     <div class="card-body">
       <p><strong>Order ID:</strong> <?= $order['order_id'] ?></p>
-      <p><strong>Customer:</strong> <?= htmlspecialchars($order['username']) ?> (<?= htmlspecialchars($order['user_email']) ?>)</p>
-      <p><strong>Status:</strong> 
+      <p><strong>Customer Name:</strong> <?= htmlspecialchars($order['full_name']) ?> (<?= htmlspecialchars($order['username']) ?>)</p>
+      <p><strong>Email:</strong> <?= htmlspecialchars($order['user_email']) ?></p>
+      <p><strong>Phone:</strong> <?= htmlspecialchars($order['user_phone']) ?></p>
+      <p><strong>Payment Method:</strong> <?= htmlspecialchars($order['payment_method']) ?></p>
+      <p><strong>Payment Status:</strong> <?= htmlspecialchars($order['payment_status']) ?></p>
+      <p><strong>Order Status:</strong> 
         <?php
           $badge = match(strtolower($order['order_status'])) {
             'pending' => 'warning',
@@ -98,6 +97,21 @@ $items = $itemsStmt->get_result();
       <p><strong>Placed At:</strong> <?= date("d M Y, h:i A", strtotime($order['placed_at'])) ?></p>
     </div>
   </div>
+
+  <!-- Shipping Address -->
+  <?php if ($address): ?>
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-secondary text-white">Shipping Address</div>
+      <div class="card-body">
+        <p><strong>Name:</strong> <?= htmlspecialchars($address['full_name']) ?></p>
+        <p><strong>Address:</strong> <?= htmlspecialchars($address['address_line']) ?></p>
+        <p><strong>Phone:</strong> <?= htmlspecialchars($address['phone']) ?></p>
+        <p><strong>City:</strong> <?= htmlspecialchars($address['city']) ?></p>
+        <p><strong>State:</strong> <?= htmlspecialchars($address['state']) ?></p>
+        <p><strong>Pincode:</strong> <?= htmlspecialchars($address['pincode']) ?></p>
+      </div>
+    </div>
+  <?php endif; ?>
 
   <!-- Ordered Items -->
   <div class="card shadow-sm">
@@ -117,8 +131,7 @@ $items = $itemsStmt->get_result();
             <tr>
               <td>
                 <?php if (!empty($item['image_url'])): ?>
-                  <img src="../uploads/products/<?= htmlspecialchars($item['image_url']) ?>" 
-                       width="50" height="50" class="me-2 rounded border">
+                  <img src="../uploads/products/<?= htmlspecialchars($item['image_url']) ?>" width="50" height="50" class="me-2 rounded border">
                 <?php else: ?>
                   <img src="../assets/no-image.png" width="50" height="50" class="me-2 rounded border">
                 <?php endif; ?>
@@ -135,5 +148,6 @@ $items = $itemsStmt->get_result();
       </table>
     </div>
   </div>
+
 </body>
 </html>
