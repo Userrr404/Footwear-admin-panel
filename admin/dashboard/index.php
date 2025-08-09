@@ -165,10 +165,17 @@ for ($i = 0; $i < 12; $i++) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     #main{
-      margin-top:30px;
+      margin-top:60px;
+    }
+
+    @media (max-width: 424px){
+      #orderChartSection{
+        display: grid;
+      }
     }
   </style>
-  <script src="../assets/js/menuToggle.js"></script>
+
+  
   <!-- Tailwind CSS 
     Without this js sidebar and main content of this page not toggle and also menuToggle.js important -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -187,38 +194,34 @@ for ($i = 0; $i < 12; $i++) {
 <!-- Main Content -->
   <div id="main" class="ml-60 transition-all duration-300 p-6">
 
-    <main>
+  <main>
       <?php if ($newOrders > 0): ?>
-      <div class="mb-6 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 rounded">
-        <p class="font-bold">🛒 New Orders</p>
-        <p><?= $newOrders ?> pending order(s). <a href="../orders/list.php" class="underline">View Orders</a></p>
-      </div>
-    <?php endif; ?>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Total Products -->
-        <div class="bg-white p-6 rounded-xl shadow">
-          <p class="text-sm text-gray-500">🛍️ Total Products</p>
-          <h2 class="text-3xl font-extrabold text-blue-600"><?= $totalProducts ?? 6 ?></h2>
-        </div>
-
-        <!-- Total Orders -->
-        <div class="bg-white p-6 rounded-xl shadow">
-          <p class="text-sm text-gray-500">📦 Total Orders</p>
-          <h2 class="text-3xl font-extrabold text-green-600"><?= $totalOrders ?? 5 ?></h2>
-        </div>
-
-        <!-- Registered Users -->
-        <div class="bg-white p-6 rounded-xl shadow">
-          <p class="text-sm text-gray-500">👤 Registered Users</p>
-          <h2 class="text-3xl font-extrabold text-yellow-500"><?= $totalUsers ?? 10 ?></h2>
-        </div>
-
-        <!-- Total Revenue -->
-        <div class="bg-white p-6 rounded-xl shadow">
-          <p class="text-sm text-gray-500">💸 Total Revenue</p>
-          <h2 class="text-3xl font-extrabold text-purple-600">₹<?= number_format($totalRevenue ?? 7494.00, 2) ?></h2>
-        </div>
-      </div>
+<div class="mb-6 p-3 sm:p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 rounded text-sm sm:text-base">
+  <p class="font-bold">🛒 New Orders</p>
+  <p><?= $newOrders ?> pending order(s). 
+    <a href="../orders/list.php" class="underline">View Orders</a>
+  </p>
+</div>
+<?php endif; ?>
+      <!-- KPI Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+  <div class="bg-white p-4 sm:p-5 rounded-xl shadow">
+    <p class="text-xs sm:text-sm text-gray-500">🛍️ Total Products</p>
+    <h2 class="text-xl sm:text-2xl font-extrabold text-blue-600"><?= $totalProducts ?></h2>
+  </div>
+  <div class="bg-white p-4 sm:p-6 rounded-xl shadow">
+    <p class="text-xs sm:text-sm text-gray-500">📦 Total Orders</p>
+    <h2 class="text-xl sm:text-2xl font-extrabold text-green-600"><?= $totalOrders ?></h2>
+  </div>
+  <div class="bg-white p-4 sm:p-6 rounded-xl shadow">
+    <p class="text-xs sm:text-sm text-gray-500">👤 Total Users</p>
+    <h2 class="text-xl sm:text-2xl font-extrabold text-yellow-500"><?= $totalUsers ?></h2>
+  </div>
+  <div class="bg-white p-4 sm:p-6 rounded-xl shadow">
+    <p class="text-xs sm:text-sm text-gray-500">💸 Total Revenue</p>
+    <h2 class="text-xl sm:text-2xl font-extrabold text-purple-600">₹<?= number_format($totalRevenue, 2) ?></h2>
+  </div>
+</div>
 
       <!-- Quick Actions -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10 mb-10">
@@ -273,26 +276,27 @@ for ($i = 0; $i < 12; $i++) {
 
 
 
-    <!-- Revenue Target Achievement Bar -->
-    <section class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow mb-10">
-      <h2 class="text-lg font-semibold text-gray-700 dark:text-white mb-4">🎯 Monthly Target Achievement</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <?php foreach ($months as $i => $month): ?>
-        <div>
-          <p class="text-sm text-gray-600 dark:text-gray-300"><?= $month ?></p>
-          <div class="w-full bg-gray-200 dark:bg-gray-700 rounded h-4 mt-1">
-            <div class="bg-green-500 h-4 rounded text-xs text-white text-center" style="width: <?= $targetAchieved[$i] ?>%">
-              <?= $targetAchieved[$i] ?>%
-            </div>
-          </div>
+    <!-- Monthly Target Achievement -->
+<section class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow mb-10">
+  <h2 class="text-base sm:text-lg font-semibold text-gray-700 dark:text-white mb-4">🎯 Monthly Target Achievement</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <?php foreach ($months as $i => $month): ?>
+    <div>
+      <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300"><?= $month ?></p>
+      <div class="w-full bg-gray-200 dark:bg-gray-700 rounded h-4 mt-1">
+        <div class="bg-green-500 h-4 rounded text-[10px] sm:text-xs text-white text-center" style="width: <?= $targetAchieved[$i] ?>%">
+          <?= $targetAchieved[$i] ?>%
         </div>
-        <?php endforeach; ?>
       </div>
-    </section>
+    </div>
+    <?php endforeach; ?>
+  </div>
+</section>
 
-    <!-- Orders Chart -->
-    <section class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow mb-10">
-      <div class="flex justify-between items-center mb-4">
+<!-- Orders Chart -->
+    <section id="orderChartSection" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow mb-10 overflow-x-auto">
+      <div class="min-w-[500px]">
+        <div class="flex justify-between items-center mb-4">
         <h2 class="text-lg font-semibold text-gray-700 dark:text-white">📈 Monthly Orders - <?= $currentYear ?></h2>
         <div class="flex items-center gap-2">
           <form method="get">
@@ -307,53 +311,62 @@ for ($i = 0; $i < 12; $i++) {
         </div>
       </div>
       <canvas id="ordersChart" height="100"></canvas>
+      </div>
     </section>
 
     <!-- Revenue Chart -->
-    <section class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
-      <div class="flex justify-between items-center mb-4">
+    <section id="revenueChartSection" class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow mt-10 overflow-x-auto">
+      <div class="min-w-[500px]">
+        <div class="flex justify-between items-center mb-4">
         <h2 class="text-lg font-semibold text-gray-700 dark:text-white">💰 Monthly Revenue (₹) - <?= $currentYear ?></h2>
         <div class="flex gap-2">
+          <form method="get">
+            <select name="year" class="border px-3 py-1 rounded text-sm dark:bg-gray-700 dark:text-white" onchange="this.form.submit()">
+              <?php foreach ($years as $y): ?>
+                <option value="<?= $y ?>" <?= $y == $currentYear ? 'selected' : '' ?>><?= $y ?></option>
+              <?php endforeach; ?>
+            </select>
+          </form>
           <button onclick="scrollRevenue(-1)" class="bg-green-100 text-green-800 px-2 py-1 rounded">⬅</button>
           <button onclick="scrollRevenue(1)" class="bg-green-100 text-green-800 px-2 py-1 rounded">➡</button>
         </div>
       </div>
       <canvas id="revenueChart" height="100"></canvas>
-      <div class="flex justify-end gap-3 mt-4">
+      <!-- <div class="flex justify-end gap-3 mt-4">
   <button onclick="exportRevenueToCSV()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm shadow">📥 Export CSV</button>
   <button onclick="exportRevenueToPDF()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 text-sm shadow">📄 Export PDF</button>
-</div>
+</div> -->
+      </div>
     </section>
 
-    <!-- Popular Products -->
-    <section class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow mt-10">
-  <div class="flex justify-between items-center mb-4">
+   <!-- Top Products Table -->
+<section class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow mt-10 overflow-x-auto">
+  <div class="min-w-[800px]">
+    <div class="flex justify-between items-center mb-4">
     <h2 class="text-lg font-semibold text-gray-700 dark:text-white">🔥 Top 5 Popular Products</h2>
     <a href="../products/list.php" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">View All Products →</a>
   </div>
-
-  <div class="overflow-x-auto">
-    <table class="min-w-full text-sm text-left">
+    <table class="w-full text-xs sm:text-sm text-left">
       <thead>
-        <tr class="border-b text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700">
+        <tr class="border-b bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
           <th class="py-2 px-3">Image</th>
           <th class="py-2 px-3">Product</th>
-          <th class="py-2 px-3">Product Price</th>
+          <th class="py-2 px-3">Price</th>
           <th class="py-2 px-3">Orders</th>
-          <th class="py-2 px-3">Units Sold</th>
+          <th class="py-2 px-3">Units</th>
           <th class="py-2 px-3">Revenue (₹)</th>
           <th class="py-2 px-3">Buyers</th>
-          <th class="py-2 px-3">Avg. Rating</th>
+          <th class="py-2 px-3">Rating</th>
           <th class="py-2 px-3">Last Ordered</th>
         </tr>
       </thead>
-      <tbody class="text-gray-700 dark:text-gray-200">
+      <tbody>
         <?php foreach ($popularProducts as $prod): ?>
         <tr class="border-b border-gray-200 dark:border-gray-700">
           <td class="py-2 px-3">
-            <img src="../uploads/products/<?= htmlspecialchars($prod['image_url']) ?>" alt="Product" class="w-12 h-12 object-cover rounded-md shadow">
+            <img src="../uploads/products/<?= htmlspecialchars($prod['image_url']) ?>" class="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded-md">
           </td>
-          <td class="py-2 px-3 font-medium"><?= htmlspecialchars($prod['product_name']) ?></td>
+          <td class="py-2 px-3"><?= htmlspecialchars($prod['product_name']) ?></td>
           <td class="py-2 px-3">₹<?= number_format($prod['price']) ?></td>
           <td class="py-2 px-3"><?= $prod['total_orders'] ?></td>
           <td class="py-2 px-3"><?= $prod['units_sold'] ?></td>
@@ -367,11 +380,11 @@ for ($i = 0; $i < 12; $i++) {
     </table>
   </div>
 </section>
-    </main>
+    </main> 
   </div>
 
-
 <!-- Scripts -->
+ <script src="../assets/js/menuToggle.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
@@ -447,50 +460,50 @@ function scrollRevenue(dir) {
   revenueChart = renderChart('revenueChart', revenueData, revenueStart, { bg: 'rgba(16,185,129,0.6)', border: 'rgba(5,150,105,1)' }, 'Revenue');
 }
 
-function exportRevenueToCSV() {
-  let csv = 'Month,Revenue\n';
-  for (let i = 0; i < labels.length; i++) {
-    csv += `${labels[i]},${revenueData[i].toFixed(2)}\n`;
-  }
+// function exportRevenueToCSV() {
+//   let csv = 'Month,Revenue\n';
+//   for (let i = 0; i < labels.length; i++) {
+//     csv += `${labels[i]},${revenueData[i].toFixed(2)}\n`;
+//   }
 
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement("a");
-  link.setAttribute("href", URL.createObjectURL(blob));
-  link.setAttribute("download", "monthly_revenue_<?= $currentYear ?>.csv");
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
+//   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+//   const link = document.createElement("a");
+//   link.setAttribute("href", URL.createObjectURL(blob));
+//   link.setAttribute("download", "monthly_revenue_<?= $currentYear ?>.csv");
+//   document.body.appendChild(link);
+//   link.click();
+//   document.body.removeChild(link);
+// }
 
-function exportRevenueToPDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'A4' });
+// function exportRevenueToPDF() {
+//   const { jsPDF } = window.jspdf;
+//   const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'A4' });
 
-  doc.setFontSize(18);
-  doc.text("📊 Monthly Revenue Report", 40, 40);
+//   doc.setFontSize(18);
+//   doc.text("📊 Monthly Revenue Report", 40, 40);
 
-  doc.setFontSize(12);
-  doc.setTextColor(100);
-  doc.text(`Year: <?= $currentYear ?>`, 40, 60);
+//   doc.setFontSize(12);
+//   doc.setTextColor(100);
+//   doc.text(`Year: <?= $currentYear ?>`, 40, 60);
 
-  const headers = [["Month", "Revenue (₹)"]];
-  const rows = labels.map((label, i) => [label, revenueData[i].toFixed(2)]);
+//   const headers = [["Month", "Revenue (₹)"]];
+//   const rows = labels.map((label, i) => [label, revenueData[i].toFixed(2)]);
 
-  if (doc.autoTable) {
-    doc.autoTable({
-      head: headers,
-      body: rows,
-      startY: 80,
-      theme: 'striped',
-      headStyles: { fillColor: [52, 58, 64], textColor: [255, 255, 255] },
-      bodyStyles: { fontSize: 10 },
-      alternateRowStyles: { fillColor: [245, 245, 245] },
-      margin: { left: 40, right: 40 },
-    });
-  }
+//   if (doc.autoTable) {
+//     doc.autoTable({
+//       head: headers,
+//       body: rows,
+//       startY: 80,
+//       theme: 'striped',
+//       headStyles: { fillColor: [52, 58, 64], textColor: [255, 255, 255] },
+//       bodyStyles: { fontSize: 10 },
+//       alternateRowStyles: { fillColor: [245, 245, 245] },
+//       margin: { left: 40, right: 40 },
+//     });
+//   }
 
-  doc.save(`Revenue_Report_<?= $currentYear ?>.pdf`);
-}
+//   doc.save(`Revenue_Report_<?= $currentYear ?>.pdf`);
+// }
 
 // Dark mode toggle persistence
     function toggleDarkMode() {

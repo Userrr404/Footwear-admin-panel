@@ -55,6 +55,23 @@ $paymentSummary = $connection->query("SELECT payment_method, SUM(total_amount) a
 <title>Orders Report</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 <script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2563eb',
+            success: '#16a34a',
+            info: '#0ea5e9',
+            neutralDark: '#1f2937',
+            cardLight: '#ffffff',
+            cardDark: '#1e293b'
+          }
+        }
+      }
+    };
+  </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
