@@ -159,33 +159,14 @@ for ($i = 0; $i < 12; $i++) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Admin Dashboard - Footwear</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    #main{
-      margin-top:60px;
-    }
-
-    @media (max-width: 424px){
+<?php include('../includes/head.php'); ?>
+<style>
+  @media (max-width: 424px){
       #orderChartSection{
         display: grid;
       }
     }
-  </style>
-
-  
-  <!-- Tailwind CSS 
-    Without this js sidebar and main content of this page not toggle and also menuToggle.js important -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class'
-    }
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
+</style>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white transition-colors duration-300">
 
 <?php include('../includes/header.php'); ?>
@@ -389,8 +370,6 @@ for ($i = 0; $i < 12; $i++) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 const labels = <?= json_encode($months) ?>;
 const orderData = <?= json_encode($orderCounts) ?>;

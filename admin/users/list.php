@@ -79,6 +79,7 @@ $totalPages = ceil($totalUsers / $limit);
     }
   </style>
   <script src="https://cdn.tailwindcss.com"></script>
+  
   <script>
     tailwind.config = {
       darkMode: 'class'
