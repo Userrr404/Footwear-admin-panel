@@ -1,18 +1,22 @@
 <?php
 require_once '../includes/auth_check.php';
 require_once '../includes/db_connections.php';
+require_once '../config.php';
 
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     die("Invalid Product ID");
 }
-
 $product_id = intval($_GET['id']);
 
-// Fetch product with brand
+// Fetch product
 $stmt = $connection->prepare("
-    SELECT p.*, b.brand_name 
+    SELECT p.*, 
+           b.brand_name, 
+           c.category_name,
+           (p.stock - p.stock_hold) AS available_stock
     FROM products p
     LEFT JOIN brands b ON p.brand_id = b.brand_id
+    LEFT JOIN categories c ON p.category_id = c.category_id
     WHERE p.product_id = ?
 ");
 $stmt->bind_param("i", $product_id);
@@ -23,70 +27,114 @@ if (!$product) {
     die("Product not found.");
 }
 
-// Fetch images
+// Sizes
+$stmt = $connection->prepare("
+    SELECT s.size_value, ps.stock 
+    FROM product_sizes ps
+    INNER JOIN sizes s ON ps.size_id = s.size_id 
+    WHERE product_id = ?
+");
+$stmt->bind_param("i", $product_id);
+$stmt->execute();
+$sizes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+// Images
 $imgStmt = $connection->prepare("SELECT * FROM product_images WHERE product_id = ?");
 $imgStmt->bind_param("i", $product_id);
 $imgStmt->execute();
-$images = $imgStmt->get_result();
+$images = $imgStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+// Primary Image
+$primaryImg = 'no-image.png';
+foreach ($images as $img) {
+    if ($img['is_default']) {
+        $primaryImg = $img['image_url'];
+        break;
+    }
+}
 ?>
-
 <!DOCTYPE html>
-<html>
-<head>
-  <title>View Product - Admin Panel</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="container mt-4">
+<html lang="en" data-bs-theme="dark">
 
-<h3 class="mb-4"><?= htmlspecialchars($product['product_name']) ?> Details</h3>
-<a href="list.php" class="btn btn-secondary mb-3">← Back to Product List</a>
-
-<!-- Main Product Card -->
-<div class="card shadow">
-  <div class="card-header bg-primary text-white">
-    <strong>Product ID:</strong> <?= $product['product_id'] ?>
-  </div>
-  <div class="card-body row">
-    <div class="col-md-4">
-      <?php
-        $primaryImg = null;
-        foreach ($images as $img) {
-          if ($img['is_default']) {
-            $primaryImg = $img['image_url'];
-            break;
-          }
+    <?php require_once '../includes/head.php'; ?>
+    <style>
+        .product-img-main {
+            max-height: 400px;
+            object-fit: contain;
+            background-color: #1a1a1a;
         }
-      ?>
-      <img src="../uploads/products/<?= $primaryImg ?? 'no-image.png' ?>" 
-           class="img-fluid border rounded" alt="Product Image">
-    </div>
-    <div class="col-md-8">
-      <p><strong>Name:</strong> <?= htmlspecialchars($product['product_name']) ?></p>
-      <p><strong>Price:</strong> ₹<?= number_format($product['price'], 2) ?></p>
-      <p><strong>Stock:</strong> <?= $product['stock'] ?></p>
-      <p><strong>Brand:</strong> <?= htmlspecialchars($product['brand_name'] ?? 'N/A') ?></p>
-      <p><strong>Description:</strong><br><?= nl2br(htmlspecialchars($product['description'])) ?></p>
-    </div>
-  </div>
-</div>
+        .img-thumb {
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .size-badge {
+            margin: 2px;
+            font-size: 0.85rem;
+        }
+    </style>
 
-<!-- All Images -->
-<h5 class="mt-4">All Images</h5>
-<div class="row">
-  <?php
-    $imgStmt->execute(); // re-run to reset result pointer
-    $images = $imgStmt->get_result();
-    foreach ($images as $img):
-  ?>
-    <div class="col-md-3 mb-3">
-      <img src="../uploads/products/<?= htmlspecialchars($img['image_url']) ?>" 
-           class="img-thumbnail" alt="Image">
-      <p class="text-center mt-1">
-        <?= $img['is_default'] ? '<span class="badge bg-success">Primary</span>' : '' ?>
-      </p>
+<body>
+<?php require_once '../includes/sub_header.php'; ?>
+
+<main class="container my-4">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+            <i class="fas fa-box"></i> Product #<?= $product['product_id'] ?>
+        </div>
+        <div class="card-body row g-4">
+            <!-- Left: Image -->
+            <div class="col-12 col-lg-4 text-center">
+                <img src="../uploads/products/<?= htmlspecialchars($primaryImg) ?>" 
+                     alt="Product Image" class="img-fluid rounded product-img-main">
+            </div>
+            <!-- Right: Info -->
+            <div class="col-12 col-lg-8">
+                <h3><?= htmlspecialchars($product['product_name']) ?></h3>
+                <p><span class="badge bg-info"><i class="fas fa-tag"></i> <?= htmlspecialchars($product['brand_name'] ?? 'N/A') ?></span>
+                   <span class="badge bg-secondary"><i class="fas fa-layer-group"></i> <?= htmlspecialchars($product['category_name'] ?? 'N/A') ?></span></p>
+
+                <p><strong>Cost Price:</strong> ₹<?= number_format($product['cost_price'], 2) ?></p>
+                <p><strong>Profit Price:</strong> ₹<?= number_format($product['profit_price'], 2) ?></p>
+                <p><strong>Selling Price:</strong> ₹<?= number_format($product['selling_price'], 2) ?></p>
+
+                <p>
+                    <strong>Sizes & Stock:</strong><br>
+                    <?php if (empty($sizes)): ?>
+                        <span class="text-muted">No sizes available</span>
+                    <?php else: ?>
+                        <?php foreach ($sizes as $s): ?>
+                            <span class="badge bg-dark size-badge">
+                                <?= htmlspecialchars($s['size_value']) ?>: <?= $s['stock'] ?>
+                            </span>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </p>
+
+                <p><strong>Total Stock:</strong> <?= $product['stock'] ?></p>
+                <p><strong>Available Stock:</strong> <?= $product['available_stock'] ?></p>
+                <p><strong>Stock on Hold:</strong> <?= $product['stock_hold'] ?></p>
+
+                <p><strong>Description:</strong><br><?= nl2br(htmlspecialchars($product['description'])) ?></p>
+                <p><small class="text-muted">Added On: <?= htmlspecialchars($product['created_at']) ?></small></p>
+            </div>
+        </div>
     </div>
-  <?php endforeach; ?>
-</div>
+
+    <!-- Image Gallery -->
+    <h5 class="mt-4">All Images</h5>
+    <div class="row row-cols-2 row-cols-md-4 g-3">
+        <?php foreach ($images as $img): ?>
+            <div class="col">
+                <img src="../uploads/products/<?= htmlspecialchars($img['image_url']) ?>" 
+                     class="w-100 img-thumb border" alt="Image">
+                <?php if ($img['is_default']): ?>
+                    <span class="badge bg-success mt-1">Primary</span>
+                <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
+    </div>
+    
+</main>
 
 </body>
 </html>

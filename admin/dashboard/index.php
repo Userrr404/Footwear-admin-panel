@@ -88,7 +88,7 @@ $popularProducts = $connection->query("
 SELECT 
   p.product_id,
   p.product_name,
-  p.price,
+  p.selling_price,
   -- Get only 1 image per product to avoid row multiplication
   (SELECT image_url FROM product_images WHERE product_id = p.product_id LIMIT 1) AS image_url,
   COUNT(DISTINCT oi.order_id) AS total_orders,
@@ -348,7 +348,7 @@ for ($i = 0; $i < 12; $i++) {
             <img src="../uploads/products/<?= htmlspecialchars($prod['image_url']) ?>" class="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded-md">
           </td>
           <td class="py-2 px-3"><?= htmlspecialchars($prod['product_name']) ?></td>
-          <td class="py-2 px-3">₹<?= number_format($prod['price']) ?></td>
+          <td class="py-2 px-3">₹<?= number_format($prod['selling_price']) ?></td>
           <td class="py-2 px-3"><?= $prod['total_orders'] ?></td>
           <td class="py-2 px-3"><?= $prod['units_sold'] ?></td>
           <td class="py-2 px-3">₹<?= number_format($prod['revenue'], 2) ?></td>
@@ -365,7 +365,7 @@ for ($i = 0; $i < 12; $i++) {
   </div>
 
 <!-- Scripts -->
- <script src="../assets/js/menuToggle.js"></script>
+<script src="../assets/js/menuToggle.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>

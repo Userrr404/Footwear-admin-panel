@@ -44,6 +44,12 @@ $result = $connection->query("
 <html lang="en">
 <?php include('../includes/head.php'); ?>
 <style>
+.buttons a{
+  display: inline;
+  border-radius: 0.375rem;
+  transition: background-color 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
 .alert-fixed {
   position: fixed;
   top: 80px;
@@ -164,12 +170,11 @@ $result = $connection->query("
 
   <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
     <h1 class="text-2xl font-semibold">🛍️ Manage Products</h1>
-    <div class="flex gap-2">
+    <div class="buttons flex gap-2">
       <a href="export.php?<?= http_build_query(array_merge($_GET, ['type' => 'csv'])) ?>" 
         class="px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm 
               border border-gray-300 bg-white text-gray-800 hover:bg-gray-100 
-              dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700 
-              transition-colors duration-200">
+              dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700 ">
         <i class="fa-solid fa-file-csv text-green-600 dark:text-green-400"></i>
         CSV
       </a>
@@ -230,7 +235,7 @@ $result = $connection->query("
                   <div class="switch-slider"></div>
                 </label>
               </div>
-              <div class="product-price dark:text-blue-400">₹<?= htmlspecialchars($product['price']) ?></div>
+              <div class="product-price dark:text-blue-400">₹<?= htmlspecialchars($product['selling_price']) ?></div>
               <div class="product-stock flex items-center gap-2 mt-1">
                 <?php 
                   $stock = intval($product['stock']);
@@ -255,7 +260,7 @@ $result = $connection->query("
               </div>
             </div>
             <div class="product-actions">
-              <a href="view.php?id=<?= $product['product_id'] ?>" class="action-view dark:bg-blue-900 dark:text-blue-300"><i class="fa-solid fa-eye"></i></a>
+              <a href="view_product.php?id=<?= $product['product_id'] ?>" class="action-view dark:bg-blue-900 dark:text-blue-300"><i class="fa-solid fa-eye"></i></a>
               <a href="edit.php?id=<?= $product['product_id'] ?>" class="action-edit dark:bg-yellow-900 dark:text-yellow-300"><i class="fa-solid fa-pen"></i></a>
               <a href="delete.php?id=<?= $product['product_id'] ?>" onclick="return confirm('Delete this product?')" class="action-del dark:bg-red-900 dark:text-red-300"><i class="fa-solid fa-trash"></i></a>
             </div>
