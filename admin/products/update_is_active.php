@@ -11,45 +11,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Validate inputs
 $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
-$field = $_POST['field'] ?? '';
-$value = $_POST['value'] ?? '';
+$value = isset($_POST['value']) ? intval($_POST['value']) : -1; // should be 0 or 1
 
-$allowedFields = ['price', 'stock', 'product_name', 'description', 'is_active'];
-if (!in_array($field, $allowedFields)) {
-    http_response_code(400);
-    echo "Invalid field";
-    exit;
-}
-
-if ($id <= 0) {
+if ($id <= 0 || ($value !== 0 && $value !== 1)) {
     http_response_code(400);
     echo "Invalid product ID";
     exit;
 }
 
-// Determine data type for prepared statement
-switch ($field) {
-    case 'price':
-        $type = 'di'; // double, int
-        $value = floatval($value);
-        break;
-    case 'stock':
-    case 'is_active':
-        $type = 'ii'; // int, int
-        $value = intval($value);
-        break;
-    case 'product_name':
-    case 'description':
-        $type = 'si'; // string, int
-        $value = trim($value);
-        break;
-    default:
-        http_response_code(400);
-        echo "Invalid field type";
-        exit;
-}
-
-$query = "UPDATE products SET `$field` = ? WHERE product_id = ?";
+$query = "UPDATE products SET is_active = ? WHERE product_id = ?";
 $stmt = $connection->prepare($query);
 
 if (!$stmt) {
@@ -58,17 +28,10 @@ if (!$stmt) {
     exit;
 }
 
-// Bind dynamically
-if ($type === 'di') {
-    $stmt->bind_param("di", $value, $id);
-} elseif ($type === 'ii') {
-    $stmt->bind_param("ii", $value, $id);
-} else {
-    $stmt->bind_param("si", $value, $id);
-}
+$stmt->bind_param("ii", $value,$id);
 
 if ($stmt->execute()) {
-    echo ucfirst(str_replace('_', ' ', $field)) . " updated successfully";
+    echo "Status updated successfully";
 } else {
     http_response_code(500);
     echo "Update failed";

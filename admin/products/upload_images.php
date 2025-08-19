@@ -3,12 +3,14 @@ require_once '../includes/auth_check.php';
 require_once '../includes/db_connections.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die("Invalid request method");
+    echo json_encode(["status" => "ERROR", "msg" => "Invalid request method"]);
+    exit;
 }
 
 $product_id = intval($_POST['product_id']);
 if ($product_id <= 0) {
-    die("Invalid product ID");
+    echo json_encode(["status" => "ERROR", "msg" => "Invalid product ID"]);
+    exit;
 }
 
 // Fetch current images to count them
@@ -17,17 +19,20 @@ $existingCount = count($existingImages);
 
 // Validate file count
 if (!isset($_FILES['images']) || empty($_FILES['images']['name'][0])) {
-    die("No files uploaded");
+    echo json_encode(["status" => "ERROR", "msg" => "No files uploaded"]);
+    exit;
 }
 
 $totalUploaded = count($_FILES['images']['name']);
 if ($existingCount + $totalUploaded > 7) {
-    die("You can only upload up to 7 images in total.");
+     echo json_encode(["status" => "ERROR", "msg" => "You can only upload up to 7 images in total."]);
+    exit;
 }
 
 $uploadDir = "../uploads/products/";
 $allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 $successCount = 0;
+$successFiles = []; // 🔹 initialize array to store successfully uploaded files
 
 // Determine max index for this product
 $maxIndex = 0;
@@ -56,9 +61,14 @@ for ($i = 0; $i < $totalUploaded; $i++) {
         $stmt->bind_param("is", $product_id, $newFilename);
         $stmt->execute();
         $successCount++;
+        $successFiles[] = $newFilename; // 🔹 add to response
     }
 }
 
-header("Location: edit.php?id=$product_id&success=1");
+if (!empty($successFiles)) {
+    echo json_encode(["status" => "OK", "files" => $successFiles]);
+} else {
+    echo json_encode(["status" => "ERROR", "msg" => "Upload failed"]);
+}
 exit;
 ?>

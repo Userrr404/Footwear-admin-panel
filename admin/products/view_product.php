@@ -74,7 +74,11 @@ foreach ($images as $img) {
     </style>
 
 <body>
-<?php require_once '../includes/sub_header.php'; ?>
+<?php
+  // Provide a subtitle to the header and include it
+  $page_subtitle = 'Product details page';
+  include ('../includes/sub_header.php');
+?>
 
 <main class="container my-4">
     <div class="card shadow-lg">
