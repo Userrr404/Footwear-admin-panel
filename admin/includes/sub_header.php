@@ -6,7 +6,10 @@ if (session_status() === PHP_SESSION_NONE) { session_start(); }
 $adminName = $_SESSION['admin_name'] ?? 'Admin';
 
 $redirectTarget = 'list.php';
-if (!empty($_SERVER['HTTP_REFERER'])) {
+// ✅ Check for explicit "back" parameter first
+if (!empty($_GET['back'])) {
+    $redirectTarget = urldecode($_GET['back']);
+} elseif (!empty($_SERVER['HTTP_REFERER'])) {
     $refPath = strtolower(parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH) ?? '');
     if (preg_match('#/(product|products)/list(\.php)?$#', $refPath)) {
         $redirectTarget = BASE_URL . '/products/list.php';
@@ -235,6 +238,7 @@ $subtitle = isset($page_subtitle) && $page_subtitle !== '' ? ' / ' . $page_subti
   const root = document.documentElement;
   const toggleBtn = document.getElementById('themeToggle');
 
+   
   const saved = localStorage.getItem(THEME_KEY) || 'light';
   root.setAttribute('data-theme', saved);
   updateThemeButton(saved);

@@ -260,8 +260,12 @@ $result = $connection->query("
               </div>
             </div>
             <div class="product-actions">
-              <a href="view_product.php?id=<?= $product['product_id'] ?>" class="action-view dark:bg-blue-900 dark:text-blue-300"><i class="fa-solid fa-eye"></i></a>
-              <a href="edit.php?id=<?= $product['product_id'] ?>" class="action-edit dark:bg-yellow-900 dark:text-yellow-300"><i class="fa-solid fa-pen"></i></a>
+              <a href="view_product.php?id=<?= $product['product_id'] ?>&back=<?= urlencode($_SERVER['REQUEST_URI']) ?>" 
+   class="action-view dark:bg-blue-900 dark:text-blue-300">
+   <i class="fa-solid fa-eye"></i>
+</a>
+
+              <a href="edit.php?id=<?= $product['product_id'] ?>&back=<?= urlencode($_SERVER['REQUEST_URI']) ?>" class="action-edit dark:bg-yellow-900 dark:text-yellow-300"><i class="fa-solid fa-pen"></i></a>
               <a href="delete.php?id=<?= $product['product_id'] ?>" onclick="return confirm('Delete this product?')" class="action-del dark:bg-red-900 dark:text-red-300"><i class="fa-solid fa-trash"></i></a>
             </div>
           </div>
@@ -303,10 +307,10 @@ document.querySelectorAll('.toggle-active').forEach(switchEl => {
     const id = this.dataset.id;
     const value = this.checked ? 1 : 0;
 
-    fetch('update_field.php', {
+    fetch('update_is_active.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `id=${id}&field=is_active&value=${value}`
+      body: `id=${id}&value=${value}`
     })
     .then(res => res.text())
     .then(() => {
