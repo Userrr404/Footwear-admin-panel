@@ -4,6 +4,9 @@ require_once '../includes/db_connections.php';
 
 $search = $_GET['search'] ?? '';
 $status = $_GET['status'] ?? '';
+$page = max(1,intval($GET['page'] ?? 1));
+$limit = 5; // same as orders/list.php
+$offset = ($page - 1) * $limit;
 $where = "WHERE 1";
 
 if ($search !== '') {
@@ -22,6 +25,7 @@ $results = $connection->query("
   JOIN users ON orders.user_id = users.user_id 
   $where 
   ORDER BY orders.order_id DESC
+  LIMIT $limit OFFSET $offset
 ");
 
 // Send headers to download CSV
@@ -29,7 +33,7 @@ header('Content-Type: text/csv');
 header('Content-Disposition: attachment;filename=orders_export.csv');
 
 $output = fopen('php://output', 'w');
-fputcsv($output, ['Order ID', 'Username', 'Total', 'Order Status', 'Payment Status', 'Date']);
+fputcsv($output, ['Order ID', 'Username', 'Total', 'Order Status', 'Payment Status', 'payment Method', 'Date']);
 
 while ($row = $results->fetch_assoc()) {
   fputcsv($output, [
@@ -38,6 +42,7 @@ while ($row = $results->fetch_assoc()) {
     "\t" . $row['total_amount'],
     ucfirst("\t" . $row['order_status']),
     ucfirst("\t" . $row['payment_status']),
+    ucfirst("\t" . $row['payment_method']),
     '="' . date('d-m-Y H:i', strtotime($row['placed_at'])) . '"'
   ]);
 }
