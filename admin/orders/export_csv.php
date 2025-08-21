@@ -4,7 +4,7 @@ require_once '../includes/db_connections.php';
 
 $search = $_GET['search'] ?? '';
 $status = $_GET['status'] ?? '';
-$page = max(1,intval($GET['page'] ?? 1));
+$page = max(1,intval($_GET['page'] ?? 1));
 $limit = 5; // same as orders/list.php
 $offset = ($page - 1) * $limit;
 $where = "WHERE 1";
